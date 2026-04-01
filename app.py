@@ -137,32 +137,32 @@ def criar_ordem():
     
     # Inserção dos dados no banco
     conn = get_connection()
-    cursor + conn_cursor()
+    cursor = conn.cursor()
     cursor.execute(
         'INSERT INTO ordens (produto, quantidade, status) VALUES (?,?,?)', 
         (produto, quantidade, status)
     )
     conn.commit()
 
-    # Recuperando o ID que é gerado automaticamente pelo banco
-    novo_id = cursor.lastrowid()
-    conn.close()
-
-    # Buscar o registr que foi recem-criado
+   # Recuperando ID que é gerado automaticamente pelo banco
+    novo_id = cursor.lastrowid
+    conn.close() # Sempre utilizar o 'conn.close()'
+    
+    # Buscar o registro que foi recem-criado
     conn = get_connection()
-    cursor = conn_cursor()
-    cursor.execute('SELECT * FROM ordens WHERE id = ?', (novo_id,))
-    nova_ordem = cursor.fetchone()
+    cursor = conn.cursor()
+    cursor.execute( # SQL
+        'SELECT * FROM ordens WHERE id = ? ', (novo_id,))
+    nova_ordem = cursor.fetchone() # 'fetchone' - Serve para limpar a string
     conn.close()
-
+    
+    # 201 - Retornar "created" com registro completo
     return jsonify(dict(nova_ordem)), 201
 
-# ------- PONTO DE PARTIDA -------
+# --- PONTO DE PARTIDA ---
 
 if __name__=='__main__':
     init_bd()
-    
-    app.run(debug=True, host='0.0.0.0', port=5000)
-        
-#teste
 
+    app.run(debug=True, host='0.0.0.0', port=5000)
+    
