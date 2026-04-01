@@ -90,7 +90,7 @@ def buscar_ordem(ordem_id):
 # Rota: Criar nova ordem de rota
 #---------------------------
 
-@app.route('ordens', methods=['POST'])
+@app.route('/ordens', methods=['POST'])
 def criar_ordem():
     '''
     Cria uma nova ordem de produção a partir dos dados JSON enviados.
@@ -111,12 +111,12 @@ def criar_ordem():
     if not dados:
         return jsonify({'erro': 'Body da requisicao ausente ou invalido'}),
 
-    #verificação de campo obrigatório (produto)
+    # Verificação de campo obrigatório (produto)
     produto = dados.get('produto', '').strip()
     if not produto:
         return jsonify({'erro': 'Campo "Produto" e obrigatorio e nao pode ser vazio'}), 400
     
-    #verificação de campo obrigatório (quantidade)
+    # Verificação de campo obrigatório (quantidade)
     quantidade = dados.get('quantidade')
     if quantidade is None:
         return jsonify({'erro': 'Campo "quantidade" e obrigatorio.'}), 400
@@ -135,6 +135,28 @@ def criar_ordem():
     if status not in status_validos:
         return jsonify({'erro': f'Status invalido. Use {status_validos}'}), 400
     
+    # Inserção dos dados no banco
+    conn = get_connection()
+    cursor + conn_cursor()
+    cursor.execute(
+        'INSERT INTO ordens (produto, quantidade, status) VALUES (?,?,?)', 
+        (produto, quantidade, status)
+    )
+    conn.commit()
+
+    # Recuperando o ID que é gerado automaticamente pelo banco
+    novo_id = cursor.lastrowid()
+    conn.close()
+
+    # Buscar o registr que foi recem-criado
+    conn = get_connection()
+    cursor = conn_cursor()
+    cursor.execute('SELECT * FROM ordens WHERE id = ?', (novo_id,))
+    nova_ordem = cursor.fetchone()
+    conn.close()
+
+    return jsonify(dict(nova_ordem)), 201
+
 # ------- PONTO DE PARTIDA -------
 
 if __name__=='__main__':
