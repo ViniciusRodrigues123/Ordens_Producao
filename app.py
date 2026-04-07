@@ -1,9 +1,18 @@
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+# app.py - SISTEMAS DE ORDENS DE PROGUÇÃO - C.R.U.D COMPLETO               
+# SENAI JARAGUÁ DO SUL - TÉCNICO EM CIBERSISTEMAS PARA AUTOMAÇÃO - 2026/1  
+#-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=
+
 #------------------------------------------
 #--- BACK-END FLASK: ROTAS DA API REST ---
 #------------------------------------------
+
+#---------------------------IMPORTES--------------------------------
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 from database import init_bd, get_connection
+import datetime
+# -------------------------------------------------------------------
 
 # Cria uma instância da aplicação Flash
 app = Flask(__name__, static_folder = 'static', static_url_path='')
@@ -20,15 +29,25 @@ def index():
     # Alimentar o arquivo INDEX.HTML da pasta STATIC
     return app.send_static_file('index.html')
 
+# ===============================
 # ROTA Nº2 - STATUS API
+# ===============================
+
 @app.route('/status')
 def status():
     # Rota de verificação da API(saúde)
-    # Retora um JSON informando que o servidor está vivo
+    # Retora um JSON informando que o servidor está ativo
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT COUNT(*) as total FROM ordens')
+    resultado = cursor.fetchone()
+    conn.close()
     return jsonify({
         "status": "online",
         "sistema": "Sistema de ordem de Producao",
-        "versao": "1.0.0",
+        "versao": "2.0.0",
+        "total_ordens": resultado["total"],
+        "times_tamp": datetime.datetime.now().strftime("%Y-%m-%d%H:%M:%S"),
         "mensagem": "Ola, Fabrica, API FUNCIONANDO!"
     })
 
